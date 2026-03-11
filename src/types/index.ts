@@ -31,14 +31,11 @@ export interface IProductsResponse {
   items: IProduct[];
 }
 
-// Данные для отправки заказа
-export interface IOrderData {
-  payment: TPayment;
-  email: string;
-  phone: string;
-  address: string;
+// Данные для отправки заказа (расширяет IBuyer, но payment уже не может быть пустым)
+export interface IOrderData extends IBuyer {
+  payment: TPayment;  // переопределяем тип - только 'card' | 'cash', без пустой строки
   total: number;
-  items: string[]; // массив id товаров
+  items: string[];
 }
 
 // Ответ сервера после отправки заказа
@@ -46,3 +43,6 @@ export interface IOrderResponse {
   id: string;
   total: number;
 }
+
+// Тип для ошибок валидации - может содержать только ключи из IBuyer
+export type FormErrors = Partial<Record<keyof IBuyer, string>>;

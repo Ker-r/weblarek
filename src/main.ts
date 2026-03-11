@@ -37,7 +37,7 @@ if (firstProduct) {
 }
 
 // Проверяем выбранный товар
-catalog.setSelected(firstProduct || null);
+catalog.setSelected(firstProduct);
 console.log('Выбранный товар:', catalog.getSelected());
 
 // Тест CartModel

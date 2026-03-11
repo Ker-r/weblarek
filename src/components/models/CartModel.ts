@@ -1,38 +1,38 @@
 import { IProduct } from '../../types/index';
 
 export class CartModel {
-  private _cartItems: IProduct[];
+  private cartItems: IProduct[];
 
   constructor() {
-    this._cartItems = [];
+    this.cartItems = [];
   }
 
   // Получить все товары в корзине
   getItems(): IProduct[] {
-    return this._cartItems;
+    return this.cartItems;
   }
 
   // Добавить товар
   addItem(product: IProduct): void {
     // Проверка, нет ли уже такого товара
     if (!this.containsItem(product.id)) {
-      this._cartItems.push(product);
+      this.cartItems.push(product);
     }
   }
 
   // Удалить товар по id
   removeItem(productId: string): void {
-    this._cartItems = this._cartItems.filter(item => item.id !== productId);
+    this.cartItems = this.cartItems.filter(item => item.id !== productId);
   }
 
   // Очистить корзину
   clearCart(): void {
-    this._cartItems = [];
+    this.cartItems = [];
   }
 
   // Получить общую стоимость
   getTotal(): number {
-    return this._cartItems.reduce((total, item) => {
+    return this.cartItems.reduce((total, item) => {
       // Если цена null, считаем как 0
       return total + (item.price ?? 0);
     }, 0);
@@ -40,11 +40,11 @@ export class CartModel {
 
   // Получить количество товаров
   getCount(): number {
-    return this._cartItems.length;
+    return this.cartItems.length;
   }
 
   // Проверить, есть ли товар в корзине
   containsItem(productId: string): boolean {
-    return this._cartItems.some(item => item.id === productId);
+    return this.cartItems.some(item => item.id === productId);
   }
 }
