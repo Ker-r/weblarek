@@ -174,3 +174,201 @@ interface IBuyer {
 #### Методы класса:
 `getProducts(): Promise<IProduct[]>` - выполняет GET-запрос на /product/;
 `placeOrder(order: IOrderData): Promise<IOrderResponse>` - выполняет POST-запрос на /order с данными заказа.
+
+## Слой представления (View)
+
+Компоненты представления отвечают за отображение интерфейса и генерируют события при действиях пользователя. Все компоненты наследуются от базового класса `Component<T>` из папки `base`.
+
+### Базовый класс `Card<T>`
+**Назначение:** общий родитель для всех карточек товара (в каталоге, в корзине, в модальном окне).
+
+**Поля:**
+- `titleElement: HTMLElement` — элемент для названия
+- `priceElement: HTMLElement` — элемент для цены
+
+**Сеттеры:**
+- `set title(value: string)` — устанавливает название
+- `set price(value: number | null)` — отображает цену или «Бесценно», если `null`
+
+---
+
+### Базовый класс `Form<T>`
+**Назначение:** общий родитель для всех форм (адрес+оплата, контакты).
+
+**Поля:**
+- `submitButton: HTMLButtonElement` — кнопка отправки
+- `errorElement: HTMLElement` — контейнер для ошибок
+
+**Методы:**
+- `set valid(value: boolean)` — блокирует/разблокирует кнопку
+- `set errors(value: Partial<Record<keyof T, string>>)` — показывает ошибки
+
+---
+
+### Компоненты интерфейса
+
+#### `Header`
+Шапка сайта с иконкой корзины и счётчиком товаров.
+
+**Поля:**
+- `basketButton: HTMLButtonElement`
+- `counterElement: HTMLElement`
+
+**Сеттер:** `set counter(value: number)`
+
+**Событие:** при клике на корзину генерирует `basket:open`
+
+---
+
+#### `Gallery`
+Контейнер для карточек товаров на главной странице.
+
+**Поля:**
+- `container: HTMLElement` — элемент `.gallery`
+
+**Сеттер:** `set catalog(items: HTMLElement[])` — очищает и добавляет карточки
+
+---
+
+#### `Modal`
+Модальное окно. Самостоятельный класс (не для наследования).
+
+**Поля:**
+- `contentElement: HTMLElement` — контейнер для контента
+- `closeButton: HTMLButtonElement`
+
+**Методы:**
+- `open()` — открывает окно
+- `close()` — закрывает окно
+- `set content(value: HTMLElement)` — устанавливает содержимое
+
+**События:** `modal:open`, `modal:close`
+
+---
+
+### Карточки товаров (наследуют `Card<T>`)
+
+#### `CardCatalog`
+Карточка товара в каталоге.
+
+**Поля:**
+- `categoryElement: HTMLElement`
+- `imageElement: HTMLImageElement`
+
+**Сеттеры:**
+- `set category(value: string)` — устанавливает категорию и CSS-класс
+- `set image(value: string)` — устанавливает изображение
+
+**Событие:** при клике на карточку генерирует `card:select` с данными товара
+
+---
+
+#### `CardPreview`
+Детальная карточка в модальном окне.
+
+**Поля:**
+- `descriptionElement: HTMLElement`
+- `buttonElement: HTMLButtonElement`
+
+**Сеттеры:**
+- `set description(value: string)`
+- `set buttonText(value: string)` — меняет текст кнопки («Купить» / «Удалить»)
+- `set buttonDisabled(value: boolean)` — блокирует кнопку (если цена `null`)
+
+**Событие:** при клике на кнопку генерирует `preview:action` с данными товара
+
+---
+
+#### `CardBasket`
+Карточка товара в корзине.
+
+**Поля:**
+- `indexElement: HTMLElement` — порядковый номер
+- `deleteButton: HTMLButtonElement`
+
+**Сеттер:** `set index(value: number)`
+
+**Событие:** при клике на удаление генерирует `basket:remove` с `id` товара
+
+---
+
+### Корзина
+
+#### `BasketView`
+Отображение корзины товаров.
+
+**Поля:**
+- `listElement: HTMLElement` — список товаров
+- `totalElement: HTMLElement` — общая стоимость
+- `checkoutButton: HTMLButtonElement` — кнопка оформления
+
+**Сеттеры:**
+- `set items(items: HTMLElement[])` — отображает список или сообщение «Корзина пуста»
+- `set total(value: number)` — отображает сумму
+- `set checkoutEnabled(value: boolean)` — активирует/деактивирует кнопку
+
+**Событие:** при клике «Оформить» генерирует `order:open`
+
+---
+
+### Формы (наследуют `Form<T>`)
+
+#### `OrderForm`
+Первый шаг оформления: способ оплаты и адрес.
+
+**Поля:**
+- `cardButton: HTMLButtonElement`
+- `cashButton: HTMLButtonElement`
+- `addressInput: HTMLInputElement`
+
+**Сеттеры:**
+- `set payment(value: 'card' | 'cash')` — выделяет выбранный способ
+- `set address(value: string)`
+
+**События:** при изменении полей — `order:change`, при отправке — `order:submit`
+
+---
+
+#### `ContactsForm`
+Второй шаг оформления: email и телефон.
+
+**Поля:**
+- `emailInput: HTMLInputElement`
+- `phoneInput: HTMLInputElement`
+
+**Сеттеры:**
+- `set email(value: string)`
+- `set phone(value: string)`
+
+**События:** при изменении полей — `contacts:change`, при отправке — `contacts:submit`
+
+---
+
+### Успешный заказ
+
+#### `Success`
+Экран после успешного оформления.
+
+**Поля:**
+- `totalElement: HTMLElement`
+- `closeButton: HTMLButtonElement`
+
+**Сеттер:** `set total(value: number)` — отображает сумму списания
+
+**Событие:** при клике на кнопку генерирует `success:close`
+
+
+## События приложения
+
+- `basket:open` — клик по корзине (Header)
+- `card:select` — клик по карточке товара (CardCatalog)
+- `preview:action` — клик по кнопке в карточке (CardPreview)
+- `basket:remove` — удаление товара из корзины (CardBasket)
+- `order:open` — клик «Оформить» (BasketView)
+- `order:change` — изменение полей формы оплаты/адреса (OrderForm)
+- `order:submit` — отправка формы оплаты/адреса (OrderForm)
+- `contacts:change` — изменение полей email/телефона (ContactsForm)
+- `contacts:submit` — отправка формы контактов (ContactsForm)
+- `modal:open` — открытие модального окна (Modal)
+- `modal:close` — закрытие модального окна (Modal)
+- `success:close` — закрытие окна успеха (Success)
