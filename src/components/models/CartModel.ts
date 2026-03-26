@@ -1,10 +1,13 @@
 import { IProduct } from '../../types/index';
+import { IEvents } from '../base/Events';
 
 export class CartModel {
   private cartItems: IProduct[];
+  private events: IEvents;
 
-  constructor() {
+  constructor(events: IEvents) {
     this.cartItems = [];
+    this.events = events;
   }
 
   // Получить все товары в корзине
@@ -17,12 +20,14 @@ export class CartModel {
     // Проверка, нет ли уже такого товара
     if (!this.containsItem(product.id)) {
       this.cartItems.push(product);
+      this.events.emit('cart:changed', this.cartItems); // Добавляем уведомление
     }
   }
 
   // Удалить товар по id
   removeItem(productId: string): void {
     this.cartItems = this.cartItems.filter(item => item.id !== productId);
+    this.events.emit('cart:changed', this.cartItems); // Добавляем уведомление
   }
 
   // Очистить корзину

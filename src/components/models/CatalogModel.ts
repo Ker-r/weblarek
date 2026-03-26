@@ -1,18 +1,22 @@
 import { IProduct } from '../../types/index';
+import { IEvents } from '../base/Events';
 
 export class CatalogModel {
   // Поля класса
   private catalogItems: IProduct[];
   private selected: IProduct | null;
-
-  constructor() {
+  private events: IEvents; // Добавляем брокер событий
+  
+  constructor(events: IEvents) {
     this.catalogItems = [];
     this.selected = null;
+    this.events = events; 
   }
 
   // Сохранить массив товаров
   setItems(items: IProduct[]): void {
     this.catalogItems = items;
+    this.events.emit('catalog:changed', this.catalogItems); // Сообщаем, что каталог изменился
   }
 
   // Получить все товары
@@ -28,6 +32,9 @@ export class CatalogModel {
   // Сохранить выбранный товар
   setSelected(product: IProduct | null): void {
     this.selected = product;
+    if (product) {
+      this.events.emit('product:selected', product); // Сообщаем, что выбранный товар изменился
+    }
   }
 
   // Получить выбранный товар

@@ -1,12 +1,16 @@
 import { IBuyer, TPayment, FormErrors } from '../../types/index';
+import { IEvents } from '../base/Events';
 
 export class BuyerModel {
   private payment: TPayment | '' = '';
   private address: string = '';
   private email: string = '';
   private phone: string = '';
+  private events: IEvents; // Добавляем брокер событий
 
-  constructor() {}
+  constructor(events: IEvents) {
+    this.events = events; // Сохраняем events
+  }
 
   // Сохранить данные (можно передать одно поле или несколько)
   setData(data: Partial<IBuyer>): void {
@@ -15,6 +19,8 @@ export class BuyerModel {
     if (data.address !== undefined) this.address = data.address;
     if (data.email !== undefined) this.email = data.email;
     if (data.phone !== undefined) this.phone = data.phone;
+
+    this.events.emit('buyer:changed', this.getData()); // Добавляем уведомление
   }
 
   // Получить все данные
@@ -33,6 +39,8 @@ export class BuyerModel {
     this.address = '';
     this.email = '';
     this.phone = '';
+
+    this.events.emit('buyer:changed', this.getData()); // Добавляем уведомление
   }
 
     validate(): FormErrors {
