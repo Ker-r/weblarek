@@ -18,21 +18,15 @@ export class BasketView extends Component<IBasketView> {
   protected totalElement: HTMLElement;
   protected checkoutButton: HTMLButtonElement;
 
-  constructor(template: HTMLTemplateElement, protected events?: IEvents, actions?: BasketViewActions) {
-    // Клонируем содержимое шаблона
-    const container = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
+  constructor(container: HTMLElement, protected events?: IEvents) {
     super(container);
     
-    // Находим элементы внутри клонированного контейнера
     this.listElement = container.querySelector('.basket__list') as HTMLElement;
     this.totalElement = container.querySelector('.basket__price') as HTMLElement;
     this.checkoutButton = container.querySelector('.basket__button') as HTMLButtonElement;
     
-    // Добавляем обработчик клика на кнопку оформления
     this.checkoutButton.addEventListener('click', () => {
-      if (actions?.onCheckout) {
-        actions.onCheckout();
-      } else if (events) {
+      if (events) {
         events.emit('order:open');
       }
     });

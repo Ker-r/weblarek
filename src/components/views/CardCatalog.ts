@@ -7,12 +7,9 @@ export class CardCatalog extends Card<IProduct> {
   protected categoryElement: HTMLElement;
   protected imageElement: HTMLImageElement;
 
-  constructor(template: HTMLTemplateElement, actions?: ICardActions) {
-    // Клонируем содержимое шаблона
-    const container = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
+  constructor(container: HTMLElement, actions?: ICardActions) {
     super(container, actions);
     
-    // Находим элементы внутри клонированного контейнера
     this.categoryElement = container.querySelector('.card__category') as HTMLElement;
     this.imageElement = container.querySelector('.card__image') as HTMLImageElement;
   }
@@ -21,11 +18,9 @@ export class CardCatalog extends Card<IProduct> {
   set category(value: string) {
     if (this.categoryElement) {
       this.categoryElement.textContent = value;
-      // Удаляем старые классы
       Object.values(categoryMap).forEach(cls => {
         this.categoryElement!.classList.remove(cls);
       });
-      // Добавляем новый класс из categoryMap
       const modifier = (categoryMap as Record<string, string>)[value] || categoryMap['другое'];
       this.categoryElement.classList.add(modifier);
     }

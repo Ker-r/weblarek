@@ -12,8 +12,7 @@ export class ContactsForm extends Form<IContactsFormData> {
   protected emailInput: HTMLInputElement;
   protected phoneInput: HTMLInputElement;
 
-  constructor(template: HTMLTemplateElement, events: IEvents) {
-    const container = template.content.firstElementChild!.cloneNode(true) as HTMLFormElement;
+  constructor(container: HTMLFormElement, events: IEvents) {
     super(container, events);
     
     this.emailInput = container.querySelector('input[name="email"]') as HTMLInputElement;

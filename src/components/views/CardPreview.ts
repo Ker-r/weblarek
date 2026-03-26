@@ -9,8 +9,7 @@ export class CardPreview extends Card<IProduct> {
   protected descriptionElement: HTMLElement;
   protected buttonElement: HTMLButtonElement;
 
-  constructor(template: HTMLTemplateElement, actions?: ICardActions) {
-    const container = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
+  constructor(container: HTMLElement, actions?: ICardActions) {
     super(container, actions);
     
     this.categoryElement = container.querySelector('.card__category') as HTMLElement;

@@ -61,13 +61,13 @@ let currentContactsForm: ContactsForm | null = null;
 
 // Создание карточки каталога
 function renderCatalogCard(product: IProduct): HTMLElement {
-  const card = new CardCatalog(cloneTemplate(cardCatalogTemplate), {
+  const container = cloneTemplate(cardCatalogTemplate);
+  const card = new CardCatalog(container, {
     onClick: () => events.emit('card:select', product)
   });
   card.title = product.title;
   card.price = product.price;
   card.category = product.category;
-  // Формируем полный URL к изображению
   const imageUrl = product.image.startsWith('http') ? product.image : CDN_URL + product.image;
   card.image = imageUrl;
   return card.render();
@@ -75,7 +75,8 @@ function renderCatalogCard(product: IProduct): HTMLElement {
 
 // Создание карточки корзины
 function renderBasketCard(product: IProduct, index: number): HTMLElement {
-  const card = new CardBasket(cloneTemplate(cardBasketTemplate), {
+  const container = cloneTemplate(cardBasketTemplate);
+  const card = new CardBasket(container, {
     onClick: () => events.emit('basket:remove', { id: product.id })
   });
   card.title = product.title;
@@ -105,8 +106,6 @@ function refreshBasketView(): void {
   }
 }
 
-// События моделей
-
 // Каталог изменился — перерисовываем галерею
 events.on('catalog:changed', (products: IProduct[]) => {
   const cards = products.map(renderCatalogCard);
@@ -121,25 +120,27 @@ events.on('cart:changed', () => {
 
 // Данные покупателя изменились — обновляем валидацию форм
 events.on('buyer:changed', () => {
-  const errors = buyerModel.validate();
-  const isValid = Object.keys(errors).length === 0;
-  
+  // Для формы заказа (первый шаг) проверяем только оплату и адрес
   if (currentOrderForm) {
+    const errors = buyerModel.validateFields(['payment', 'address']);
+    const isValid = buyerModel.canProceedToContacts();
     currentOrderForm.valid = isValid;
     currentOrderForm.errors = errors;
   }
   
+  // Для формы контактов (второй шаг) проверяем email и телефон
   if (currentContactsForm) {
+    const errors = buyerModel.validateFields(['email', 'phone']);
+    const isValid = buyerModel.canSubmitOrder();
     currentContactsForm.valid = isValid;
     currentContactsForm.errors = errors;
   }
 });
 
-//События представления
-
 // Открытие корзины
 events.on('basket:open', () => {
-  const basketView = new BasketView(cloneTemplate(basketTemplate), events);
+  const container = cloneTemplate(basketTemplate);
+  const basketView = new BasketView(container, events);
   currentBasketView = basketView;
   
   const items = cartModel.getItems().map((item, idx) => renderBasketCard(item, idx + 1));
@@ -155,7 +156,8 @@ events.on('card:select', (product: IProduct) => {
   const inCart = cartModel.containsItem(product.id);
   const hasPrice = product.price !== null && product.price > 0;
   
-  const previewCard = new CardPreview(cloneTemplate(cardPreviewTemplate), {
+  const container = cloneTemplate(cardPreviewTemplate);
+  const previewCard = new CardPreview(container, {
     onClick: () => events.emit('preview:action', product)
   });
   
@@ -195,19 +197,20 @@ events.on('basket:remove', (data: { id: string }) => {
   cartModel.removeItem(data.id);
 });
 
-// Оформление заказа (кнопка в корзине)
+// Оформление заказа (кнопка в корзине) — открываем первый шаг
 events.on('order:open', () => {
-  const orderForm = new OrderForm(cloneTemplate(orderTemplate), events);
+  const container = cloneTemplate(orderTemplate) as HTMLFormElement;
+  const orderForm = new OrderForm(container, events);
   currentOrderForm = orderForm;
   
   const buyerData = buyerModel.getData();
   orderForm.payment = buyerData.payment;
   orderForm.address = buyerData.address;
   
-  // Проверяем валидность
-  const errors = buyerModel.validate();
-  const isValid = Object.keys(errors).length === 0;
+  // Проверяем валидность первого шага
+  const isValid = buyerModel.canProceedToContacts();
   orderForm.valid = isValid;
+  const errors = buyerModel.validateFields(['payment', 'address']);
   orderForm.errors = errors;
   
   openModal(orderForm.render());
@@ -222,24 +225,24 @@ events.on('order:change', (data: { field: string, value: string }) => {
   }
 });
 
-// Отправка формы заказа (переход ко второй форме)
+// Отправка формы заказа — переход ко второму шагу
 events.on('order:submit', () => {
-  const errors = buyerModel.validate();
-  const isValid = Object.keys(errors).length === 0;
+  const canProceed = buyerModel.canProceedToContacts();
   
-  if (isValid) {
-    const contactsForm = new ContactsForm(cloneTemplate(contactsTemplate), events);
+  if (canProceed) {
+    const container = cloneTemplate(contactsTemplate) as HTMLFormElement;
+    const contactsForm = new ContactsForm(container, events);
     currentContactsForm = contactsForm;
     
     const buyerData = buyerModel.getData();
     contactsForm.email = buyerData.email;
     contactsForm.phone = buyerData.phone;
     
-    // Проверяем валидность контактов
-    const contactsErrors = buyerModel.validate();
-    const contactsValid = Object.keys(contactsErrors).length === 0;
-    contactsForm.valid = contactsValid;
-    contactsForm.errors = contactsErrors;
+    // Проверяем валидность второго шага
+    const isValid = buyerModel.canSubmitOrder();
+    contactsForm.valid = isValid;
+    const errors = buyerModel.validateFields(['email', 'phone']);
+    contactsForm.errors = errors;
     
     openModal(contactsForm.render());
   }
@@ -254,12 +257,11 @@ events.on('contacts:change', (data: { field: string, value: string }) => {
   }
 });
 
-// Отправка формы контактов (оформление заказа)
+// Отправка формы контактов — оформление заказа
 events.on('contacts:submit', async () => {
-  const errors = buyerModel.validate();
-  const isValid = Object.keys(errors).length === 0;
+  const canSubmit = buyerModel.canSubmitOrder();
   
-  if (isValid) {
+  if (canSubmit) {
     try {
       const buyerData = buyerModel.getData();
       const orderData = {
@@ -274,7 +276,8 @@ events.on('contacts:submit', async () => {
       const result = await api.placeOrder(orderData);
       
       // Показываем экран успеха
-      const success = new Success(cloneTemplate(successTemplate), events);
+      const container = cloneTemplate(successTemplate);
+      const success = new Success(container, events);
       success.total = result.total;
       openModal(success.render());
       
@@ -301,7 +304,7 @@ events.on('modal:close', () => {
   currentContactsForm = null;
 });
 
-// Загрузка товаров с сервера
+// Загрузка с сервера
 api.getProducts()
   .then(products => {
     catalogModel.setItems(products);

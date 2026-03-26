@@ -6,30 +6,20 @@ interface ISuccessData {
   total: number;
 }
 
-// Интерфейс для действий успеха
-export interface SuccessActions {
-  onClose?: () => void;
-}
-
 // Сообщение об успешном оформлении заказа
 export class Success extends Component<ISuccessData> {
   protected totalElement: HTMLElement;
   protected closeButton: HTMLButtonElement;
 
-  constructor(template: HTMLTemplateElement, protected events?: IEvents, actions?: SuccessActions) {
-    const container = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
+  constructor(container: HTMLElement, protected events: IEvents) {
     super(container);
     
     this.totalElement = container.querySelector('.order-success__description') as HTMLElement;
     this.closeButton = container.querySelector('.order-success__close') as HTMLButtonElement;
     
-    // При клике на кнопку отправляем событие или вызываем колбэк
+    // При клике на кнопку отправляем событие
     this.closeButton.addEventListener('click', () => {
-      if (actions?.onClose) {
-        actions.onClose();
-      } else if (events) {
-        events.emit('success:close');
-      }
+      this.events.emit('success:close');
     });
   }
 

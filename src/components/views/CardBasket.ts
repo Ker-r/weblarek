@@ -6,8 +6,7 @@ export class CardBasket extends Card<IProduct> {
   protected indexElement: HTMLElement;
   protected deleteButton: HTMLButtonElement;
 
-  constructor(template: HTMLTemplateElement, actions?: ICardActions) {
-    const container = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
+  constructor(container: HTMLElement, actions?: ICardActions) {
     super(container, actions);
     
     this.indexElement = container.querySelector('.basket__item-index') as HTMLElement;
