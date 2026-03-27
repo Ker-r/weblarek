@@ -69,14 +69,4 @@ export class BuyerModel {
 
     return errors;
   }
-
-  // Проверяет, можно ли перейти ко второму шагу
-  canProceedToContacts(): boolean {
-    return !!(this.payment && this.address.trim());
-  }
-
-  // Проверяет, можно ли отправить заказ
-  canSubmitOrder(): boolean {
-    return !!(this.payment && this.address.trim() && this.email.trim() && this.phone.trim());
-  }
 }

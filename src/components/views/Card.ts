@@ -1,43 +1,36 @@
 import { Component } from '../base/Component';
-
-// Интерфейс для обработчиков кликов по карточке
-export interface ICardActions {
-  onClick?: (event: MouseEvent) => void;
-}
+import { ensureElement } from '../../utils/utils';
 
 // Базовый класс для всех карточек товара
 export class Card<T> extends Component<T> {
   protected titleElement: HTMLElement;
   protected priceElement: HTMLElement;
+  protected _id: string = '';
 
-  constructor(container: HTMLElement, actions?: ICardActions) {
+  constructor(container: HTMLElement) {
     super(container);
     
-    // Находим элементы в переданном контейнере
-    this.titleElement = container.querySelector('.card__title') as HTMLElement;
-    this.priceElement = container.querySelector('.card__price') as HTMLElement;
-    
-    // Если передан обработчик клика, вешаем его на всю карточку
-    if (actions?.onClick) {
-      container.addEventListener('click', actions.onClick);
-    }
+    this.titleElement = ensureElement<HTMLElement>('.card__title', container);
+    this.priceElement = ensureElement<HTMLElement>('.card__price', container);
+  }
+
+  // Сеттер для id
+  set id(value: string) {
+    this._id = value;
+    this.container.dataset.id = value;
   }
 
   // Устанавливаем название товара
   set title(value: string) {
-    if (this.titleElement) {
-      this.titleElement.textContent = value;
-    }
+    this.titleElement.textContent = value;
   }
 
   // Устанавливаем цену. Если null — показываем "Бесценно"
   set price(value: number | null) {
-    if (this.priceElement) {
-      if (value === null) {
-        this.priceElement.textContent = 'Бесценно';
-      } else {
-        this.priceElement.textContent = `${value} синапсов`;
-      }
+    if (value === null) {
+      this.priceElement.textContent = 'Бесценно';
+    } else {
+      this.priceElement.textContent = `${value} синапсов`;
     }
   }
 }
