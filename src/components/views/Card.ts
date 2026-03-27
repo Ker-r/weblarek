@@ -20,6 +20,10 @@ export class Card<T> extends Component<T> {
     this.container.dataset.id = value;
   }
 
+  get id(): string {
+    return this._id;
+  }
+
   // Устанавливаем название товара
   set title(value: string) {
     this.titleElement.textContent = value;

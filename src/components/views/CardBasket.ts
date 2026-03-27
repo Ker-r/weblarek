@@ -13,6 +13,7 @@ export class CardBasket extends Card<IProduct> {
     
     this.indexElement = ensureElement<HTMLElement>('.basket__item-index', container);
     this.deleteButton = ensureElement<HTMLButtonElement>('.basket__item-delete', container);
+    
     this.deleteButton.addEventListener('click', (e) => {
       e.stopPropagation();
       this.events.emit('basket:remove', { id: this.id });

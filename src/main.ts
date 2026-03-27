@@ -175,18 +175,16 @@ events.on('product:selected', (product: IProduct) => {
 
 // Выбор карточки
 events.on('card:select', (data: { id: string }) => {
-  console.log('card:select получен, id:', data.id); // для отладки
+  console.log('card:select', data.id);
   const product = catalogModel.getProduct(data.id);
   if (product) {
-    console.log('product найден:', product.title); // для отладки
     catalogModel.setSelected(product);
-  } else {
-    console.log('product НЕ найден для id:', data.id);
   }
 });
 
 // Действие в карточке товара (купить/удалить)
 events.on('preview:action', (data: { id: string }) => {
+  console.log('preview:action', data.id);
   const product = catalogModel.getProduct(data.id);
   if (product) {
     if (cartModel.containsItem(product.id)) {

@@ -15,7 +15,6 @@ export class CardCatalog extends Card<IProduct> {
     this.categoryElement = ensureElement<HTMLElement>('.card__category', container);
     this.imageElement = ensureElement<HTMLImageElement>('.card__image', container);
     
-    // При клике на карточку генерируем событие с id товара
     container.addEventListener('click', () => {
       if (this.id) {
         this.events.emit('card:select', { id: this.id });
@@ -23,7 +22,7 @@ export class CardCatalog extends Card<IProduct> {
     });
   }
 
-  // Устанавливаем категорию и CSS-класс для фона
+  // Устанавливаем категорию и CSS-класс для фона 
   set category(value: string) {
     this.categoryElement.textContent = value;
     Object.values(categoryMap).forEach(cls => {
@@ -32,10 +31,9 @@ export class CardCatalog extends Card<IProduct> {
     const modifier = (categoryMap as Record<string, string>)[value] || categoryMap['другое'];
     this.categoryElement.classList.add(modifier);
   }
-
-  // Устанавливаем изображение
+  
+  // Устанавливаем изображение 
   set image(value: string) {
-    // Формируем полный URL к изображению
     const url = value.startsWith('http') ? value : `${CDN_URL}${value}`;
     this.setImage(this.imageElement, url, this.title);
   }

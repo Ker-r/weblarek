@@ -19,7 +19,6 @@ export class CardPreview extends Card<IProduct> {
     this.descriptionElement = ensureElement<HTMLElement>('.card__text', container);
     this.buttonElement = ensureElement<HTMLButtonElement>('.card__button', container);
     
-    // При клике на кнопку генерируем событие
     this.buttonElement.addEventListener('click', (e) => {
       e.stopPropagation();
       this.events.emit('preview:action', { id: this.id });
